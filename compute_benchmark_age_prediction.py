@@ -142,6 +142,8 @@ def load_benchmark_data(dataset, benchmark, condition=None):
         condition_ = condition
     df_subjects = pd.read_csv(bids_root / "participants.tsv", sep='\t')
     df_subjects = df_subjects.set_index('participant_id')
+    if dataset == 'omega': # use only the control subject for omega
+        df_subjects = df_subjects[df_subjects['group'] == 'Control']
     df_subjects = df_subjects.sort_index()  # Sort rows by participant_id so
     # that the cross-validation folds are the same across benchmarks.
 
@@ -168,7 +170,14 @@ def load_benchmark_data(dataset, benchmark, condition=None):
             {band: list(covs[:, ii]) for ii, band in
              enumerate(frequency_bands)})
         y = df_subjects.age.values
-        rank = 65 if dataset == 'camcan' else len(analyze_channels) - 1
+        
+        rank = 0
+        if dataset == 'camcan':
+            rank = 65
+        elif dataset =='omega':
+            rank = 50
+        else:
+            rank = len(analyze_channels) - 1
 
         filter_bank_transformer = coffeine.make_filter_bank_transformer(
             names=list(frequency_bands),
