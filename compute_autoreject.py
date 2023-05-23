@@ -8,7 +8,7 @@ import autoreject
 
 from utils import prepare_dataset
 
-DATASETS = ['chbp', 'lemon', 'tuab', 'camcan']
+DATASETS = ['chbp', 'lemon', 'tuab', 'camcan', 'omega']
 parser = argparse.ArgumentParser(description='Compute autoreject.')
 parser.add_argument(
     '-d', '--dataset',
@@ -58,6 +58,9 @@ def run_subject(subject, cfg):
     if any(ch.endswith('-REF') for ch in epochs.ch_names):
         epochs.rename_channels(
             {ch: ch.rstrip('-REF') for ch in epochs.ch_names})
+
+    # Added for omega
+    epochs.pick_types( meg = True)
 
     # XXX Seems to be necessary for TUAB - figure out why
     if 'eeg' in epochs:

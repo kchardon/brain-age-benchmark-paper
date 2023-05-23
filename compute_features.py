@@ -14,7 +14,7 @@ import h5io
 
 from utils import prepare_dataset
 
-DATASETS = ['chbp', 'lemon', 'tuab', 'camcan']
+DATASETS = ['chbp', 'lemon', 'tuab', 'camcan', 'omega']
 FEATURE_TYPE = ['fb_covs', 'handcrafted', 'source_power']
 parser = argparse.ArgumentParser(description='Compute features.')
 parser.add_argument(
@@ -203,7 +203,7 @@ for dataset, feature_type in tasks:
             label = 'pooled'
             if '/' in condition:
                 label = f'eyes-{condition.split("/")[1]}'
-        elif dataset in ("tuab", 'camcan'):
+        elif dataset in ("tuab", 'camcan', 'omega'):
             label = 'rest'
 
         out_fname = cfg.deriv_root / f'features_{feature_type}_{label}.h5'

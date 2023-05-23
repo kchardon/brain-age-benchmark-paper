@@ -22,7 +22,7 @@ from deep_learning_utils import (
     make_braindecode_scorer)
 
 
-DATASETS = ['chbp', 'lemon', 'tuab', 'camcan']
+DATASETS = ['chbp', 'lemon', 'tuab', 'camcan', 'omega']
 BENCHMARKS = ['dummy', 'filterbank-riemann', 'filterbank-source',
               'handcrafted', 'shallow', 'deep']
 
@@ -60,7 +60,8 @@ print(f"Datasets: {', '.join(datasets)}")
 config_map = {'chbp': "config_chbp_eeg",
               'lemon': "config_lemon_eeg",
               'tuab': "config_tuab_eeg",
-              'camcan': "config_camcan_meg"}
+              'camcan': "config_camcan_meg",
+              'omega': "config_omega_meg"}
 
 bench_config = {  # put other benchmark related config here
     'filterbank-riemann': {  # it can go in a seprate file later
@@ -102,7 +103,7 @@ def load_benchmark_data(dataset, benchmark, condition=None):
 
     Parameters
     ----------
-    dataset: 'camcan' | 'chbp' | 'lemon' | 'tuh'
+    dataset: 'camcan' | 'chbp' | 'lemon' | 'tuh' | 'omega'
         The input data to consider
     benchmark: 'filter_bank' | 'hand_crafted' | 'deep'
         The input features to consider. If 'deep', no features are loaded.

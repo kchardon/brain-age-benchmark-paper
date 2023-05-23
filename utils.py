@@ -6,7 +6,8 @@ def prepare_dataset(dataset):
     config_map = {'chbp': "config_chbp_eeg",
                   'lemon': "config_lemon_eeg",
                   'tuab': "config_tuab_eeg",
-                  'camcan': "config_camcan_meg"}
+                  'camcan': "config_camcan_meg",
+                  'omega': "config_omega_meg"}
     if dataset not in config_map:
         raise ValueError(
             f"We don't know the dataset '{dataset}' you requested.")
@@ -24,18 +25,20 @@ def prepare_dataset(dataset):
         'lemon': ('eyes/closed', 'eyes/open'),
         'chbp': ('eyes/closed', 'eyes/open'),
         'tuab': ('rest',),
-        'camcan': ('rest',)
+        'camcan': ('rest',),
+        'omega': ('rest',)
     }[dataset]
     cfg_out.feature_conditions = {  # use for selecting data for features
         'lemon': ('eyes',),
         'chbp': ('eyes',),
         'tuab': ('rest',),
-        'camcan': ('rest',)
+        'camcan': ('rest',),
+        'omega': ('rest',)
     }[dataset]
 
     cfg_out.session = ''
     sessions = cfg_in.sessions
-    if dataset in ('tuab', 'camcan'):
+    if dataset in ('tuab', 'camcan', 'omega'):
         cfg_out.session = 'ses-' + sessions[0]
 
     subjects_df = pd.read_csv(cfg_out.bids_root / "participants.tsv", sep='\t')
