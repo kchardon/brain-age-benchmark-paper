@@ -138,6 +138,12 @@ print(sub_features - set(subjects_data['subject_id']))
 
 
 
+#%% Save log files of twe two sessions in one
+features_log = pd.concat([features_ses01[features_ses01['ok']=='OK'], features_ses02[features_ses02['ok'] == 'OK']])
+features_log.to_csv(os.path.join(deriv_root,'feature_fb_covs_rest-log.csv'))
+
+
+
 #%% Running the benchmark only for healthy subjects
 # Concat the files of the 2 sessions in one
 
