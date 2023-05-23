@@ -3,8 +3,11 @@ import pathlib
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import h5io
+import numpy as np
 
 bids_root = pathlib.Path('/storage/store2/data/Omega')
+deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 
 # %% Participants data
 participants_file = os.path.join(bids_root, "participants.tsv")
@@ -63,7 +66,6 @@ plt.savefig('repartition_subjects.png')
 
 # %% Verify is all the subjects have been preprocessed
 
-deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 sub_preprocess = []
 
 for subject in os.listdir(deriv_root):
@@ -97,7 +99,6 @@ epochs.info['ch_names']
 
 # Verify if all the subjects have been preprocessed with autoreject
 
-deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 autoreject_ses01 = pd.read_csv(os.path.join(deriv_root, 'autoreject_log_ses-01.csv'), index_col=0)
 autoreject_ses02 = pd.read_csv(os.path.join(deriv_root, 'autoreject_log_ses-02.csv'), index_col=0)
 
@@ -114,11 +115,49 @@ print(sub_autoreject - set(subjects_data['subject_id']))
 
 # %% Computing the covariances (filterbank-riemann) for each session
 # python compute_features.py --n_jobs 40 -d omega -t fb_covs
-# 1, 
+# 1, 2
+# -> feature_fb_covs_rest-log.csv and features_fb_covs_rest.h5(both with _ses-01 or _ses-02))
 
-# Running the benchmark only for healthy subjects
+
+
+# See if all the subjects have their covariance 
+
+features_ses01 = pd.read_csv(os.path.join(deriv_root, 'feature_fb_covs_rest-log_ses-01.csv'), index_col=0)
+features_ses02 = pd.read_csv(os.path.join(deriv_root, 'feature_fb_covs_rest-log_ses-02.csv'), index_col=0)
+
+set01 = set(features_ses01[features_ses01['ok'] == 'OK']['subject'])
+set01.update(set(features_ses02[features_ses02['ok'] == 'OK']['subject']))
+
+sub_features = set()
+
+for subject in set01:
+    sub_features.add(subject[4:])
+
+print(set(subjects_data['subject_id']) - sub_features)
+print(sub_features - set(subjects_data['subject_id']))
+
+
+
+#%% Running the benchmark only for healthy subjects
+# Concat the files of the 2 sessions in one
+
+features_ses01 = h5io.read_hdf5(
+            deriv_root / 'features_fb_covs_rest_ses-01.h5')
+
+features_ses02 = h5io.read_hdf5(
+            deriv_root / 'features_fb_covs_rest_ses-02.h5')
+
+features = {**features_ses01, **features_ses02}
+
+out_fname = deriv_root / 'features_fb_covs_rest.h5'
+
+h5io.write_hdf5(
+            out_fname,
+            features,
+            overwrite=True
+        )
+
+
 # python compute_benchmark_age_prediction.py --n_jobs 10 -d omega -b filterbank-riemann
-# voir ligne 171 pour le rank
-
-
+# -> 
 
