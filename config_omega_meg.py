@@ -52,7 +52,7 @@ source_info_path_update = {'processing': 'autoreject',
 
 task_is_rest = True
 task = 'rest'
-sessions = ['01']
+sessions = ['02']
 runs = ['01']
 data_type = 'meg'
 ch_types = ['meg']
