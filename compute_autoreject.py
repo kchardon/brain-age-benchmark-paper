@@ -67,8 +67,8 @@ def run_subject(subject, cfg):
         montage = mne.channels.make_standard_montage('standard_1005')
         epochs.set_montage(montage)
 
-    if analyze_channels:
-        epochs.pick_channels(analyze_channels)
+    #if analyze_channels:
+    #    epochs.pick_channels(analyze_channels)
 
     ar = autoreject.AutoReject(n_jobs=1, cv=5)
     epochs = ar.fit_transform(epochs)
