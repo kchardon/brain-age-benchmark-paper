@@ -62,7 +62,7 @@ plt.bar([0,1,2], list(subjects_data.groupby(['group']).count().iloc[:,0]), color
 plt.title("Repartition of subjects by groups")
 plt.legend()
 #plt.show()
-plt.savefig('repartition_subjects.png')
+plt.savefig('repartition_subjects_group.png')
 
 # %% Verify is all the subjects have been preprocessed
 
@@ -165,5 +165,27 @@ h5io.write_hdf5(
 
 
 # python compute_benchmark_age_prediction.py --n_jobs 10 -d omega -b filterbank-riemann
-# -> 
+# -> ./results/benchmark-filterbank-riemann_dataset-omega_ys.csv et ./results/benchmark-filterbank-riemann_dataset-omega.csv
+
+# %% Age distribution
+
+A = all_subjects.loc[all_subjects['group'] == 'Control', 'age']
+B = all_subjects.loc[all_subjects['group'] == 'Parkinson', 'age']
+C = all_subjects.loc[all_subjects['group'] == 'Chronic Pain', 'age']
+
+#bins = range(20,90,1)
+
+plt.hist(A, alpha=0.5, label='Control')
+plt.hist(B, alpha=0.5, label='Parkinson')
+plt.hist(C, alpha=0.5, label='Chronic Pain')
+
+plt.title('Age Distribution by Group')
+plt.xlabel('Age')
+plt.ylabel('Count')
+plt.legend(title='Group')
+
+plt.savefig('repartition_subjects_age.png')
+
+
+# %% Visualisations
 
