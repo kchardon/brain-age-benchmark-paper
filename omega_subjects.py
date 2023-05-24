@@ -193,8 +193,8 @@ plt.savefig('repartition_subjects_age.png')
 # %% Visualisation of true age vs predicted age
 
 results = pd.read_csv("/storage/store3/work/kachardo/brain-age-benchmark-paper/results/benchmark-filterbank-riemann_dataset-omega_ys.csv", index_col=0)
-plt.plot(results['y_true'], label = 'True ages')
-plt.plot(results['y_pred'], label = 'Predicted ages')
+plt.plot(list(results['y_true']), label = 'True ages')
+plt.plot(list(results['y_pred']), label = 'Predicted ages')
 
 plt.title('True age vs Predicted age for each participant')
 plt.xlabel('Subject number')
