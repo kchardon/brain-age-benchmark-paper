@@ -333,8 +333,9 @@ def run_benchmark_cv(benchmark, dataset):
 
     ys = pd.DataFrame(dict(y_true=ys_true, y_pred=ys_pred))
     ys['cv_split'] = 0
-    ys.loc[cv_splits[:, 1], 'cv_split'] = cv_splits[:, 0].astype(int)
-    ys['subject'] = df_subjects.index
+    ys['cv_split'] = cv_splits[:, 0].astype(int)
+    ys.loc[np.argsort(cv_splits[:,1]),'subject'] = df_subjects.index
+    ys = ys.loc[np.argsort(cv_splits[:,1]), :]
 
     results = pd.DataFrame(
         {'MAE': scores['test_mean_absolute_error_with_memory'],
