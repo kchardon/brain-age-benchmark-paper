@@ -177,7 +177,7 @@ def load_benchmark_data(dataset, benchmark, condition=None):
         if dataset == 'camcan':
             rank = 65
         elif dataset =='omega':
-            rank = 50
+            rank = 262
         else:
             rank = len(analyze_channels) - 1
 
