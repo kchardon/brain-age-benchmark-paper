@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import h5io
 import numpy as np
+import mne
 
 bids_root = pathlib.Path('/storage/store2/data/Omega')
 deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
@@ -83,10 +84,9 @@ print(set(sub_preprocess) - set(subjects_data['subject_id']))
 
 # %% Find the good channel names
 
-import mne
-
 epochs = mne.read_epochs('/storage/store3/work/kachardo/derivatives/omega/sub-0221/ses-01/meg/sub-0221_ses-01_task-rest_proc-clean_epo.fif')
-epochs.info['ch_names']
+print(epochs.info['ch_names'])
+print(len(epochs.info['ch_names']))
 
 # %% Preprocessing with brain-age-benchmark
 
@@ -139,10 +139,12 @@ print(sub_features - set(subjects_data['subject_id']))
 
 
 #%% Save log files of twe two sessions in one
-features_log = pd.concat([features_ses01[features_ses01['ok']=='OK'], features_ses02[features_ses02['ok'] == 'OK']])
+
+features_log = pd.concat([features_ses01[features_ses01['ok']=='OK'], features_ses02[features_ses02['ok'] == 'OK']], ignore_index=True)
+features_log = features_log.sort_values(by = 'subject')
+# %%
+
 features_log.to_csv(os.path.join(deriv_root,'feature_fb_covs_rest-log.csv'))
-
-
 
 #%% Running the benchmark only for healthy subjects
 # Concat the files of the 2 sessions in one
@@ -154,8 +156,11 @@ features_ses02 = h5io.read_hdf5(
             deriv_root / 'features_fb_covs_rest_ses-02.h5')
 
 features = {**features_ses01, **features_ses02}
+features = dict(sorted(features.items()))
 
 out_fname = deriv_root / 'features_fb_covs_rest.h5'
+
+# %%
 
 h5io.write_hdf5(
             out_fname,
@@ -173,8 +178,6 @@ A = all_subjects.loc[all_subjects['group'] == 'Control', 'age']
 B = all_subjects.loc[all_subjects['group'] == 'Parkinson', 'age']
 C = all_subjects.loc[all_subjects['group'] == 'Chronic Pain', 'age']
 
-#bins = range(20,90,1)
-
 plt.hist(A, alpha=0.5, label='Control')
 plt.hist(B, alpha=0.5, label='Parkinson')
 plt.hist(C, alpha=0.5, label='Chronic Pain')
@@ -187,5 +190,35 @@ plt.legend(title='Group')
 plt.savefig('repartition_subjects_age.png')
 
 
-# %% Visualisations
+# %% Visualisation of true age vs predicted age
+
+results = pd.read_csv("/storage/store3/work/kachardo/brain-age-benchmark-paper/results/benchmark-filterbank-riemann_dataset-omega_ys.csv", index_col=0)
+plt.plot(results['y_true'], label = 'True ages')
+plt.plot(results['y_pred'], label = 'Predicted ages')
+
+plt.title('True age vs Predicted age for each participant')
+plt.xlabel('Subject number')
+plt.ylabel('Age')
+plt.legend(title='Group')
+
+plt.savefig('repartition_subjects_true_pred.png')
+
+plt.show()
+
+A = results['y_true']
+B = results['y_pred']
+
+bins = range(20,90,1)
+
+plt.hist(A, bins, alpha=0.5, label='True ages')
+plt.hist(B, bins, alpha=0.5, label='Predicted ages')
+
+plt.title('Distributions of true ages and predicted ages')
+plt.xlabel('Age')
+plt.ylabel('Count')
+plt.legend(title='Group')
+
+plt.savefig('repartition_subjects_true_pred2.png')
+
+# %%
 
