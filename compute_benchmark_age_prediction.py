@@ -154,6 +154,8 @@ def load_benchmark_data(dataset, benchmark, condition=None):
         feature_label = bench_cfg['feature_map']
         feature_log = f'feature_{feature_label}_{condition_}-log.csv'
         proc_log = pd.read_csv(deriv_root / feature_log)
+        if dataset == 'omega': # use only the control subject for omega
+            proc_log = proc_log[proc_log['subject'].isin(df_subjects.index)]
         good_subjects = proc_log.query('ok == "OK"').subject
         df_subjects = df_subjects.loc[good_subjects]
         print(f"Found data from {len(good_subjects)} subjects")
