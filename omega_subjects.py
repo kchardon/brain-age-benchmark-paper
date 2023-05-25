@@ -169,7 +169,7 @@ h5io.write_hdf5(
         )
 
 
-# python compute_benchmark_age_prediction.py --n_jobs 10 -d omega -b filterbank-riemann
+# python compute_benchmark_age_prediction.py --n_jobs 1 -d omega -b filterbank-riemann
 # -> ./results/benchmark-filterbank-riemann_dataset-omega_ys.csv et ./results/benchmark-filterbank-riemann_dataset-omega.csv
 
 # %% Age distribution
@@ -220,5 +220,30 @@ plt.legend(title='Group')
 
 plt.savefig('repartition_subjects_true_pred2.png')
 
-# %%
+# %% Number of subjects with age <= 50 and > 50
 
+counts_age_50 = np.unique(np.where(all_subjects['age'] <= 50, 0, 1), return_counts = True)
+
+plt.bar(counts_age_50[0],counts_age_50[1], label = ['age <= 50', 'age > 50'], color = ['green', 'red'])
+plt.legend()
+plt.xticks([], [])
+plt.title('Number of subjects with age <= 50 and > 50')
+
+plt.savefig('repartition_subjects_age_50.png')
+
+percentage_sup_50 = counts_age_50[1][1] / counts_age_50[1].sum() * 100
+print('~'+str(np.floor(percentage_sup_50)) + '% of the subjects have age > 50')
+
+# %% Number of control subjects with age <= 50 and > 50
+
+counts_age_50_control = np.unique(np.where(all_subjects[all_subjects['group'] == 'Control']['age'] <= 50, 0, 1), return_counts = True )
+
+plt.bar(counts_age_50_control[0],counts_age_50_control[1], label = ['age <= 50', 'age > 50'], color = ['green', 'red'])
+plt.legend()
+plt.xticks([], [])
+plt.title('Number of control subjects with age <= 50 and > 50')
+
+plt.savefig('repartition_control_subjects_age_50.png')
+
+percentage_sup_50_control = counts_age_50_control[1][1] / counts_age_50_control[1].sum() * 100
+print('~'+str(np.floor(percentage_sup_50_control)) + '% of the control subjects have age > 50')
