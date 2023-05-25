@@ -1,0 +1,27 @@
+rank = 25
+MAE(filterbank-riemann, omega) = 4.47884578603451
+r2(filterbank-riemann, omega) = -0.15615793319072643
+
+rank = 50
+MAE(filterbank-riemann, omega) = 4.392019276149497
+r2(filterbank-riemann, omega) = -0.14762733589528734
+
+rank = 65
+MAE(filterbank-riemann, omega) = 4.384557070553487
+r2(filterbank-riemann, omega) = -0.155446768250544
+
+rank = 100
+MAE(filterbank-riemann, omega) = 4.414543166345488
+r2(filterbank-riemann, omega) = -0.1718308086997096
+
+rank = 150
+MAE(filterbank-riemann, omega) = 4.381834784317162
+r2(filterbank-riemann, omega) = -0.17233286595871167
+
+rank = 200
+MAE(filterbank-riemann, omega) = 4.349218837705728
+r2(filterbank-riemann, omega) = -0.1683128419063769
+
+rank = 262
+MAE(filterbank-riemann, omega) = 4.388013970509846
+r2(filterbank-riemann, omega) = -0.18584821638636573
