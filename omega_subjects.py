@@ -193,8 +193,8 @@ plt.savefig('repartition_subjects_age.png')
 # %% Visualisation of true age vs predicted age
 
 results = pd.read_csv("/storage/store3/work/kachardo/brain-age-benchmark-paper/results/benchmark-filterbank-riemann_dataset-omega_ys.csv", index_col=0)
-plt.plot(list(results['y_true']), label = 'True ages')
-plt.plot(list(results['y_pred']), label = 'Predicted ages')
+plt.scatter(range(len(list(results['y_true']))), list(results['y_true']), label = 'True ages', )
+plt.scatter( range(len(list(results['y_pred']))), list(results['y_pred']), label = 'Predicted ages')
 
 plt.title('True age vs Predicted age for each participant')
 plt.xlabel('Subject number')
@@ -247,3 +247,49 @@ plt.savefig('repartition_control_subjects_age_50.png')
 
 percentage_sup_50_control = counts_age_50_control[1][1] / counts_age_50_control[1].sum() * 100
 print('~'+str(np.floor(percentage_sup_50_control)) + '% of the control subjects have age > 50')
+
+# %% Scatterplot (predictions for all subjects)
+
+results = pd.read_csv("/storage/store3/work/kachardo/brain-age-benchmark-paper/results/benchmark-filterbank-riemann_dataset-omega_ys.csv", index_col=0)
+plt.scatter(range(len(list(results['y_true']))), list(results['y_true']), label = 'True ages', )
+plt.scatter( range(len(list(results['y_pred']))), list(results['y_pred']), label = 'Predicted ages')
+
+plt.title('True age vs Predicted age for each participant')
+plt.xlabel('Subject number')
+plt.ylabel('Age')
+plt.legend(title='Group')
+
+plt.savefig('repartition_subjects_true_pred.png')
+
+plt.show()
+
+# %% Scatterplot 2
+from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
+
+fig, ax = plt.subplots()
+
+ax.set_xlim(20, 90)
+ax.set_ylim(20,90)
+
+ax.xaxis.set_major_locator(MultipleLocator(10))
+ax.yaxis.set_major_locator(MultipleLocator(10))
+
+ax.xaxis.set_minor_locator(AutoMinorLocator(10))
+ax.yaxis.set_minor_locator(AutoMinorLocator(10))
+
+ax.grid(which='major', alpha = 0.2)
+ax.grid(which='minor', alpha = 0.2)
+
+plt.scatter(list(results['y_true']), list(results['y_pred']), color = 'orange', label = "subject", marker = 'x', alpha = 0.5)
+plt.plot(range(22,85), range(22,85), color = 'red', label = "x=y")
+plt.xlabel('True Age')
+plt.ylabel('Predicted Age')
+plt.title('True age vs Predicted age')
+plt.legend()
+
+plt.savefig('scatter_predictions.png')
+
+plt.show()
+
+# %%
+results['y_true']

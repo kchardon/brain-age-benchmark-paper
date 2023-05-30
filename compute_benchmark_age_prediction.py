@@ -144,7 +144,7 @@ def load_benchmark_data(dataset, benchmark, condition=None):
     df_subjects = df_subjects.set_index('participant_id')
     if dataset == 'omega': # use only the control subject for omega
         df_subjects = df_subjects[df_subjects['group'] == 'Control']
-        df_subjects = df_subjects[df_subjects['age'] > 50]
+        #df_subjects = df_subjects[df_subjects['age'] > 50]
     df_subjects = df_subjects.sort_index()  # Sort rows by participant_id so
     # that the cross-validation folds are the same across benchmarks.
 
@@ -178,7 +178,7 @@ def load_benchmark_data(dataset, benchmark, condition=None):
         if dataset == 'camcan':
             rank = 65
         elif dataset =='omega':
-            rank = 262
+            rank = 100
         else:
             rank = len(analyze_channels) - 1
 
