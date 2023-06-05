@@ -44,6 +44,6 @@ def prepare_dataset(dataset):
     subjects_df = pd.read_csv(cfg_out.bids_root / "participants.tsv", sep='\t')
     subjects = sorted(sub for sub in subjects_df.participant_id if
                       (cfg_out.deriv_root / sub / cfg_out.session /
-                       cfg_out.data_type).exists())
+                       cfg_out.data_type).exists() and sub in ['sub-0258', 'sub-0312', 'sub-CONP0204', 'sub-CONP0241', 'sub-CONP0106', 'sub-0470'])
 
     return cfg_out, subjects
