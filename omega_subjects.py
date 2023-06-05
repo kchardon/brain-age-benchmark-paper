@@ -3,6 +3,7 @@ import pathlib
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 import h5io
 import numpy as np
 import mne
@@ -264,6 +265,7 @@ plt.savefig('repartition_subjects_true_pred.png')
 plt.show()
 
 # %% Scatterplot 2
+results = pd.read_csv("/storage/store3/work/kachardo/brain-age-benchmark-paper/results/benchmark-filterbank-riemann_dataset-omega_ys.csv", index_col=0)
 from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
 
 fig, ax = plt.subplots()
@@ -291,5 +293,92 @@ plt.savefig('scatter_predictions.png')
 
 plt.show()
 
+# %% Find subject with bad predictions' reports
+results = results.reset_index()
 # %%
-results['y_true']
+diff = np.abs(results['y_true'] - results['y_pred'])
+diff_idx = diff.sort_values(ascending = False).index
+all_subjects[all_subjects['group'] == 'Control'].iloc[diff_idx[:10],:]
+
+# %% Find subject's reports with good predictions
+
+diff_idx = diff.sort_values(ascending = True).index
+all_subjects[all_subjects['group'] == 'Control'].iloc[diff_idx[:15],:]
+
+# %% Compare nb of clean epochs after and before autoreject
+
+bad_sub_dir = os.path.join(deriv_root,"sub-0258/ses-02/meg")
+bad2_sub_dir = os.path.join(deriv_root,"sub-0312/ses-02/meg")
+good_sub_dir = os.path.join(deriv_root,"sub-0470/ses-02/meg")
+good2_sub_dir = os.path.join(deriv_root,"sub-CONP0106/ses-02/meg")
+
+bad_before = os.path.join(bad_sub_dir,"sub-0258_ses-02_task-rest_proc-clean_epo.fif")
+bad_after = os.path.join(bad_sub_dir,"sub-0258_ses-02_task-rest_proc-autoreject_epo.fif")
+
+bad2_before = os.path.join(bad2_sub_dir,"sub-0312_ses-02_task-rest_proc-clean_epo.fif")
+bad2_after = os.path.join(bad2_sub_dir,"sub-0312_ses-02_task-rest_proc-autoreject_epo.fif")
+
+good_before = os.path.join(good_sub_dir,"sub-0470_ses-02_task-rest_proc-clean_epo.fif")
+good_after = os.path.join(good_sub_dir,"sub-0470_ses-02_task-rest_proc-autoreject_epo.fif")
+
+good2_before = os.path.join(good2_sub_dir,"sub-CONP0106_ses-02_task-rest_proc-clean_epo.fif")
+good2_after = os.path.join(good2_sub_dir,"sub-CONP0106_ses-02_task-rest_proc-autoreject_epo.fif")
+
+# %%
+
+epochs_bad_before = mne.read_epochs(bad_before)
+epochs_bad_after = mne.read_epochs(bad_after)
+
+epochs_bad2_before = mne.read_epochs(bad2_before)
+epochs_bad2_after = mne.read_epochs(bad2_after)
+
+epochs_good_before = mne.read_epochs(good_before)
+epochs_good_after = mne.read_epochs(good_after)
+
+epochs_good2_before = mne.read_epochs(good2_before)
+epochs_good2_after = mne.read_epochs(good2_after)
+
+# %% 
+
+print("bad : sub-0258")
+print(epochs_bad_before)
+print(epochs_bad_after)
+
+print("bad : sub-0312")
+print(epochs_bad2_before)
+print(epochs_bad2_after)
+
+print("good : sub-0470")
+print(epochs_good_before)
+print(epochs_good_after)
+
+print("good : sub-CONP0106")
+print(epochs_good2_before)
+print(epochs_good2_after)
+
+# %%
+
+print(epochs_bad_before.get_channel_types())
+print(len(epochs_bad_before.get_channel_types()))
+print(epochs_bad_after.get_channel_types())
+print(len(epochs_bad_after.get_channel_types()))
+
+# %% Print PSD of all the subjects (after autoreject)
+
+fig, axs = plt.subplots(nrows=82, ncols=2, layout='constrained', figsize=(20,200))
+i = 0
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            axs.flat[i].set_ylim([-10,120])
+            axs.flat[i].set_title(subject)
+            epoch.compute_psd().plot(axes = axs.flat[i])
+            i +=1
+            break
+
+plt.show()
+plt.savefig('omega_subjects_control_psd.png')
