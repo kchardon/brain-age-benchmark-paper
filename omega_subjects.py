@@ -375,10 +375,9 @@ for subject in os.listdir(deriv_root):
             epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
             epoch = mne.read_epochs(epoch_file)
             axs.flat[i].set_ylim([-10,120])
-            axs.flat[i].set_title(subject)
+            axs.flat[i].set_xlabel(subject)
             epoch.compute_psd().plot(axes = axs.flat[i])
             i +=1
-            break
 
 plt.show()
-plt.savefig('omega_subjects_control_psd.png')
+fig.savefig('omega_subjects_control_psd.png')
