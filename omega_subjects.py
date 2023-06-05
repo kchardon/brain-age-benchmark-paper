@@ -381,3 +381,30 @@ for subject in os.listdir(deriv_root):
 
 plt.show()
 fig.savefig('omega_subjects_control_psd.png')
+
+# %% Print PSD average of all subjects in one plot
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+colors = list(colors)
+color = None
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            if i >= len(colors):
+                color = colors[i - len(colors)]
+            else:
+                color = colors[i]
+            epoch.compute_psd().plot(color = color,average = True,axes = ax, ci = None)
+            i += 1
+
+ax.set_title('Average PSD for each Control subject')
+plt.show()
+fig.savefig('omega_subjects_control_psd_average.png')
