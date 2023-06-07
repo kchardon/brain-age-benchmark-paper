@@ -3,7 +3,7 @@ import pathlib
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib
+import json
 import h5io
 import numpy as np
 import mne
@@ -18,6 +18,7 @@ subjects_id = all_subjects['participant_id'].str.extract(r'sub-([\d\w]+)')
 
 # %% Get the session and run to use for each subject
 subjects_data = pd.DataFrame(columns = ['subject_id', 'group', 'session', 'run'])
+count_not_found = 0
 
 for subject in os.listdir(bids_root):
     if subject.startswith('sub'):
@@ -28,15 +29,32 @@ for subject in os.listdir(bids_root):
             for run in range(1,5):
                 if find :
                     break
+                
                 dir_path = pathlib.Path(os.path.join(
                 bids_root,
                 subject,
                 'ses-0'+str(ses)+'/meg',
                 subject + '_ses-0'+str(ses)+'_task-rest_run-0'+str(run)+'_meg.ds'))
+                
                 if dir_path.exists():
-                    new_row = {'subject_id' : subject[4:], 'group' : all_subjects[subjects_id[0] == subject[4:]]['group'][len(subjects_data)], 'session' : ses, 'run' : run}
-                    subjects_data.loc[len(subjects_data)] = new_row
-                    find = True
+
+                    info_path = pathlib.Path(os.path.join(
+                    bids_root,
+                    subject,
+                    'ses-0'+str(ses)+'/meg',
+                    subject + '_ses-0'+str(ses)+'_task-rest_run-0'+str(run)+'_meg.json'))
+                    
+                    with open(info_path, 'r') as f:
+                        data = json.load(f)
+                        if data["EOGChannelCount"] == 2 and data["ECGChannelCount"] == 1:
+                            new_row = {'subject_id' : subject[4:], 'group' : all_subjects[subjects_id[0] == subject[4:]]['group'].iloc[0], 'session' : ses, 'run' : run}
+                            subjects_data.loc[len(subjects_data)] = new_row
+                            find = True
+                            print('Foud for', subject, "session", ses, "run", run)
+        if find == False:
+            print("Not found for", subject)
+            count_not_found += 1
+print("not found for", count_not_found)
 
 # %% Save the group, session and run for each subject as CSV
 subjects_data.to_csv('omega_subjects.csv', index=False)
@@ -54,8 +72,10 @@ list21 = list(subjects_data[(subjects_data['session'] == 2) & (subjects_data['ru
 list22 = list(subjects_data[(subjects_data['session'] == 2) & (subjects_data['run'] == 2)]['subject_id'])
 list23 = list(subjects_data[(subjects_data['session'] == 2) & (subjects_data['run'] == 3)]['subject_id'])
 # %% Preprocessing on each list of subjects with mne_bids_pipeline and config_omega_meg.py
+# mne_bids_pipeline --config config_omega_meg.py --n_jobs 40 --steps=preprocessing
 # 11, 21, 12, 13, 22, 23
 # -> task-rest_proc-clean_epo.fif (global file deleted)
+# 11, 
 
 
 # Plot distribution of groups
@@ -408,3 +428,27 @@ for subject in os.listdir(deriv_root):
 ax.set_title('Average PSD for each Control subject')
 plt.show()
 fig.savefig('omega_subjects_control_psd_average.png')
+
+# %% Print compensation grade
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file, verbose = False)
+            if epoch.compensation_grade != 3:
+                print(id)
+                print('compensation grade = ', epoch.compensation_grade)
+            else:
+                print(id, "ok")
+
+# %% Raw channels
+raw_file = "sub-0221/ses-01/meg/sub-0221_ses-01_task-rest_run-01_meg.ds"
+raw_path = os.path.join(bids_root, raw_file)
+
+raw = mne.io.read_raw_ctf(raw_path)
+print(raw.info)
+raw.set_channel_types({"HEOG": "eog", "VEOG": "eog", "ECG": "ecg"})
+raw.info

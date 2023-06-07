@@ -29,11 +29,10 @@ subject_id,group,session,run
 0310,Control,2,1
 0312,Control,2,1
 0357,Control,2,1
-0365,Control,2,1
 0371,Control,2,1
-0372,Parkinson,1,1
+0372,Parkinson,1,2
 0373,Parkinson,1,1
-0376,Parkinson,1,1
+0376,Parkinson,1,2
 0377,Parkinson,1,1
 0378,Control,1,1
 0379,Parkinson,1,1
