@@ -3,6 +3,7 @@ import pathlib
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import colors as mcolors
 import json
 import h5io
 import numpy as np
@@ -15,6 +16,10 @@ deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 participants_file = os.path.join(bids_root, "participants.tsv")
 all_subjects = pd.read_csv(participants_file, sep = '\t')
 subjects_id = all_subjects['participant_id'].str.extract(r'sub-([\d\w]+)')
+
+# %% Subjects data
+subjects_data = pd.read_csv('omega_subjects.csv')
+
 
 # %% Get the session and run to use for each subject
 subjects_data = pd.DataFrame(columns = ['subject_id', 'group', 'session', 'run'])
@@ -75,7 +80,6 @@ list23 = list(subjects_data[(subjects_data['session'] == 2) & (subjects_data['ru
 # mne_bids_pipeline --config config_omega_meg.py --n_jobs 40 --steps=preprocessing
 # 11, 21, 12, 13, 22, 23
 # -> task-rest_proc-clean_epo.fif (global file deleted)
-# 11, 
 
 
 # Plot distribution of groups
@@ -403,6 +407,7 @@ plt.show()
 fig.savefig('omega_subjects_control_psd.png')
 
 # %% Print PSD average of all subjects in one plot
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 
 fig = plt.figure(figsize = (10,5))
 ax = plt.subplot()
@@ -452,3 +457,82 @@ raw = mne.io.read_raw_ctf(raw_path)
 print(raw.info)
 raw.set_channel_types({"HEOG": "eog", "VEOG": "eog", "ECG": "ecg"})
 raw.info
+
+# %% Processing wits SSP
+# 11, 12, 13, 21, 22, 23
+
+# %% Print PSD average of all subjects in one plot
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+colors = list(colors)
+color = None
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            if i >= len(colors):
+                color = colors[i - len(colors)]
+            else:
+                color = colors[i]
+            epoch.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax, ci = None)
+            i += 1
+            
+ax.set_title('Average PSD for each Control subject')
+plt.show()
+# %% Print PSD of all the subjects
+
+fig, axs = plt.subplots(nrows=82, ncols=2, layout='constrained', figsize=(20,200))
+i = 0
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            axs.flat[i].set_ylim([-10,120])
+            axs.flat[i].set_xlabel(subject)
+            epoch.compute_psd(picks = 'meg').plot(axes = axs.flat[i], picks = 'meg', average = True, ci = None)
+            i +=1
+
+plt.show()
+fig.savefig('omega_subjects_control_psd_ssp.png')
+
+# %% autoreject after ssp 1, 2
+# PSD
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+colors = list(colors)
+color = None
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            if i >= len(colors):
+                color = colors[i - len(colors)]
+            else:
+                color = colors[i]
+            epoch.compute_psd().plot(color = color,average = True,axes = ax, ci = None)
+            i += 1
+
+ax.set_title('Average PSD for each Control subject')
+plt.show()
+fig.savefig('omega_subjects_control_psd_average_autoreject.png')
