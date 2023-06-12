@@ -9,7 +9,7 @@ subjects_dir = pathlib.Path('/storage/store/data/camcan-mne/freesurfer')
 
 subjects = ['0523']
 
-process_empty_room = False
+process_empty_room = True
 
 drop_channels = [
     'MLC63', 'MLO52', 'MLT26', 'MLT55',
@@ -61,6 +61,7 @@ ch_types = ['meg']
 l_freq = 0.1
 h_freq = 49
 notch_freq = 60
+
 
 eog_channels = ["VEOG", "HEOG"]
 

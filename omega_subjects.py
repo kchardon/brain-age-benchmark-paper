@@ -11,6 +11,7 @@ import mne
 
 bids_root = pathlib.Path('/storage/store2/data/Omega')
 deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
+deriv_root_without_ssp = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega/without_ssp')
 
 # %% Participants data
 participants_file = os.path.join(bids_root, "participants.tsv")
@@ -536,3 +537,116 @@ for subject in os.listdir(deriv_root):
 ax.set_title('Average PSD for each Control subject')
 plt.show()
 fig.savefig('omega_subjects_control_psd_average_autoreject.png')
+
+# %% Plot PSD with and without SSP
+# Before autoreject
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+colors = list(colors)
+color = None
+
+fig = plt.figure(figsize = (10,5))
+ax_no_ssp = plt.subplot(2,1,1)
+ax_ssp = plt.subplot(2,1,2)
+fig.add_subplot(ax_no_ssp)
+fig.add_subplot(ax_ssp)
+
+for i, subject in enumerate(list(subjects_data[subjects_data['group'] == 'Control']['subject_id'])):
+        session = subjects_data[subjects_data['subject_id']==subject]['session'].iloc[0]
+        
+        epoch_file_no_ssp = os.path.join(deriv_root_without_ssp,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+        epoch_file_ssp = os.path.join(deriv_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+        
+        epoch_no_ssp = mne.read_epochs(epoch_file_no_ssp)
+        epoch_ssp = mne.read_epochs(epoch_file_ssp)
+        
+        if i >= len(colors):
+            color = colors[i - len(colors)]
+        else:
+            color = colors[i]
+
+        epoch_no_ssp.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_no_ssp, ci = None)
+        epoch_ssp.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_ssp, ci = None)
+            
+ax_no_ssp.set_title('Average PSD for each Control subject (Without SSP, before autoreject)')
+ax_ssp.set_title('Average PSD for each Control subject (With SSP, before autoreject)')
+fig
+
+# After autoreject
+
+fig = plt.figure(figsize = (10,5))
+ax_no_ssp = plt.subplot(2,1,1)
+ax_ssp = plt.subplot(2,1,2)
+fig.add_subplot(ax_no_ssp)
+fig.add_subplot(ax_ssp)
+
+for i, subject in enumerate(list(subjects_data[subjects_data['group'] == 'Control']['subject_id'])):
+        session = subjects_data[subjects_data['subject_id']==subject]['session'].iloc[0]
+        
+        epoch_file_no_ssp = os.path.join(deriv_root_without_ssp,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+        epoch_file_ssp = os.path.join(deriv_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+        
+        epoch_no_ssp = mne.read_epochs(epoch_file_no_ssp)
+        epoch_ssp = mne.read_epochs(epoch_file_ssp)
+        
+        if i >= len(colors):
+            color = colors[i - len(colors)]
+        else:
+            color = colors[i]
+
+        epoch_no_ssp.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_no_ssp, ci = None)
+        epoch_ssp.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_ssp, ci = None)
+            
+ax_no_ssp.set_title('Average PSD for each Control subject (Without SSP, after autoreject)')
+ax_ssp.set_title('Average PSD for each Control subject (With SSP, after autoreject)')
+fig
+
+# %% Try empty room SSP on data
+
+data_file = os.path.join(deriv_root,"sub-0260/ses-02/meg/","sub-0260_ses-02_task-rest_proc-clean_epo.fif")
+raw = mne.read_epochs(data_file)
+raw.load_data()
+
+raw_proj = raw.copy()
+
+empty_room_file = os.path.join(deriv_root,"sub-0260/ses-02/meg/","sub-0260_ses-02_task-noise_proc-filt_raw.fif")
+empty_room_raw = mne.io.read_raw_fif(empty_room_file)
+
+empty_room_raw.del_proj()
+
+empty_room_projs = mne.compute_proj_raw(empty_room_raw)
+
+raw_proj.add_proj(empty_room_projs)
+raw_proj.apply_proj()
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot(1,1,1)
+fig.add_subplot(ax)
+
+raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
+raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
+
+# %%
+
+data_file = os.path.join(deriv_root,"sub-0528/ses-01/meg/","sub-0528_ses-01_task-rest_proc-clean_epo.fif")
+raw = mne.read_epochs(data_file)
+raw.load_data()
+
+raw_proj = raw.copy()
+
+empty_room_file = os.path.join(deriv_root,"sub-0528/ses-01/meg/","sub-0528_ses-01_task-noise_proc-filt_raw.fif")
+empty_room_raw = mne.io.read_raw_fif(empty_room_file)
+
+empty_room_raw.del_proj()
+
+empty_room_projs = mne.compute_proj_raw(empty_room_raw)
+
+raw_proj.add_proj(empty_room_projs)
+raw_proj.apply_proj()
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot(1,1,1)
+fig.add_subplot(ax)
+
+raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
+raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
