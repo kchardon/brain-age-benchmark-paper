@@ -626,15 +626,92 @@ fig.add_subplot(ax)
 raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
 raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
 
-# %%
+# %% Bad results from age prediction
 
-data_file = os.path.join(deriv_root,"sub-0528/ses-01/meg/","sub-0528_ses-01_task-rest_proc-clean_epo.fif")
+data_file = os.path.join(deriv_root,"sub-0258/ses-02/meg/","sub-0258_ses-02_task-rest_proc-clean_epo.fif")
 raw = mne.read_epochs(data_file)
 raw.load_data()
 
 raw_proj = raw.copy()
 
-empty_room_file = os.path.join(deriv_root,"sub-0528/ses-01/meg/","sub-0528_ses-01_task-noise_proc-filt_raw.fif")
+empty_room_file = os.path.join(deriv_root,"sub-0258/ses-02/meg/","sub-0258_ses-02_task-noise_proc-filt_raw.fif")
+empty_room_raw = mne.io.read_raw_fif(empty_room_file)
+
+empty_room_raw.del_proj()
+
+empty_room_projs = mne.compute_proj_raw(empty_room_raw)
+
+raw_proj.add_proj(empty_room_projs)
+raw_proj.apply_proj()
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot(1,1,1)
+fig.add_subplot(ax)
+
+raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
+raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
+
+# %% Bad PSD 1
+
+data_file = os.path.join(deriv_root,"sub-0378/ses-01/meg/","sub-0378_ses-01_task-rest_proc-clean_epo.fif")
+raw = mne.read_epochs(data_file)
+raw.load_data()
+
+raw_proj = raw.copy()
+
+empty_room_file = os.path.join(deriv_root,"sub-0378/ses-01/meg/","sub-0378_ses-01_task-noise_proc-filt_raw.fif")
+empty_room_raw = mne.io.read_raw_fif(empty_room_file)
+
+empty_room_raw.del_proj()
+
+empty_room_projs = mne.compute_proj_raw(empty_room_raw)
+
+raw_proj.add_proj(empty_room_projs)
+raw_proj.apply_proj()
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot(1,1,1)
+fig.add_subplot(ax)
+
+raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
+raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
+
+
+# %% Bad PSD 2
+
+data_file = os.path.join(deriv_root,"sub-0457/ses-01/meg/","sub-0457_ses-01_task-rest_proc-clean_epo.fif")
+raw = mne.read_epochs(data_file)
+raw.load_data()
+
+raw_proj = raw.copy()
+
+empty_room_file = os.path.join(deriv_root,"sub-0457/ses-01/meg/","sub-0457_ses-01_task-noise_proc-filt_raw.fif")
+empty_room_raw = mne.io.read_raw_fif(empty_room_file)
+
+empty_room_raw.del_proj()
+
+empty_room_projs = mne.compute_proj_raw(empty_room_raw)
+
+raw_proj.add_proj(empty_room_projs)
+raw_proj.apply_proj()
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot(1,1,1)
+fig.add_subplot(ax)
+
+raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
+raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
+
+
+# %% Bad PSD 3
+
+data_file = os.path.join(deriv_root,"sub-CONP0173/ses-02/meg/","sub-CONP0173_ses-02_task-rest_proc-clean_epo.fif")
+raw = mne.read_epochs(data_file)
+raw.load_data()
+
+raw_proj = raw.copy()
+
+empty_room_file = os.path.join(deriv_root,"sub-CONP0173/ses-02/meg/","sub-CONP0173_ses-02_task-noise_proc-filt_raw.fif")
 empty_room_raw = mne.io.read_raw_fif(empty_room_file)
 
 empty_room_raw.del_proj()
