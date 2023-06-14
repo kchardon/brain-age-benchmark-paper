@@ -727,3 +727,12 @@ fig.add_subplot(ax)
 
 raw.compute_psd().plot(average = True, axes = ax, color = 'blue', ci = None)
 raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
+
+# Autoreject
+# 2, 1
+
+
+# Compute features
+# 1, 2
+
+# Benchmark
