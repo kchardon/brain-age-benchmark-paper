@@ -736,3 +736,16 @@ raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
 # 1, 2
 
 # Benchmark
+# MAE(filterbank-riemann, omega) = 7.0246106695767185
+# r2(filterbank-riemann, omega) = -0.3647212507252994
+
+# dummy :
+# MAE(dummy, omega) = 6.979008924949289
+# r2(dummy, omega) = -0.07963111111175525
+
+
+# PSD of worst subject
+
+raw = mne.io.read_raw_ctf("/storage/store2/data/Omega/sub-CONP0173/ses-02/meg/sub-CONP0173_ses-02_task-rest_run-01_meg.ds")
+
+raw.compute_psd().plot()

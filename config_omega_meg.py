@@ -2,14 +2,17 @@ import pathlib
 import os
 
 
-bids_root = pathlib.Path('/storage/store2/data/Omega')
-deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
+#bids_root = pathlib.Path('/storage/store2/data/Omega')
+#deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
+
+bids_root = pathlib.Path('/storage/store3/work/kachardo/sub-0002_test')
+deriv_root = pathlib.Path('/storage/store3/work/kachardo/sub-0002_test/sub-0002_derivatives')
 
 subjects_dir = pathlib.Path('/storage/store/data/camcan-mne/freesurfer')
 
-subjects = ['0523']
+subjects = ['0002']
 
-process_empty_room = True
+process_empty_room = False
 
 drop_channels = [
     'MLC63', 'MLO52', 'MLT26', 'MLT55',
@@ -53,8 +56,8 @@ source_info_path_update = {'processing': 'autoreject',
 
 task_is_rest = True
 task = 'rest'
-sessions = ['02']
-runs = ['03']
+sessions = ['01']
+runs = ['01']
 data_type = 'meg'
 ch_types = ['meg']
 
