@@ -744,8 +744,53 @@ raw_proj.compute_psd().plot(average = True, axes = ax, color = 'red', ci = None)
 # r2(dummy, omega) = -0.07963111111175525
 
 
-# PSD of worst subject
+# %% PSD of worst subject
 
 raw = mne.io.read_raw_ctf("/storage/store2/data/Omega/sub-CONP0173/ses-02/meg/sub-CONP0173_ses-02_task-rest_run-01_meg.ds")
 
 raw.compute_psd().plot()
+
+# %% SSP on some subjects
+# All epochs, compute projectors on small frequencies
+
+subjects = ["CONP0173"]
+nb_proj = [2,5,10,15,20,30]
+fig, axs = plt.subplots(nrows=7, ncols=1, figsize = (40,35))
+
+for sub in subjects:
+    session = subjects_data[subjects_data['subject_id']==sub]['session'].iloc[0]
+    epoch_file = os.path.join(deriv_root,"sub-"+str(sub), "ses-0"+str(session), "meg","sub-"+str(sub)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+        
+    epoch = mne.read_epochs(epoch_file)
+    epoch_filtered = epoch.filter(0.1,7)
+
+    epoch.compute_psd(picks = 'meg').plot(axes = axs.flat[0])
+    axs.flat[0].set_title("No projector used")
+    axs.flat[0].set_xlim([0,10])
+    axs.flat[0].set_ylim([-10,120])
+    
+    for i, n_proj in enumerate(nb_proj):
+        projectors = mne.compute_proj_epochs(epoch_filtered, n_mag=n_proj)
+        epoch.add_proj(projectors)
+        epoch.apply_proj()
+
+        epoch.compute_psd(picks = 'meg').plot(axes = axs.flat[i+1])
+        
+        axs.flat[i+1].set_xlim([0,10])
+        axs.flat[i+1].set_ylim([-10,120])
+        axs.flat[i+1].set_title(str(n_proj )+" projectors used")
+
+plt.show()
+
+
+# %% PSD CONP0173 raw (0-70 HZ)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize = (15,5))
+
+raw_path = os.path.join(bids_root, "sub-CONP0173/ses-02/meg/sub-CONP0173_ses-02_task-rest_run-01_meg.ds")
+raw = mne.io.read_raw_ctf(raw_path)
+
+raw.compute_psd(picks = 'meg').plot(axes = ax)
+
+ax.set_xlim([0,70])
+
+plt.show()
