@@ -2,17 +2,14 @@ import pathlib
 import os
 
 
-#bids_root = pathlib.Path('/storage/store2/data/Omega')
-#deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
-
-bids_root = pathlib.Path('/storage/store3/work/kachardo/sub-0002_test')
-deriv_root = pathlib.Path('/storage/store3/work/kachardo/sub-0002_test/sub-0002_derivatives')
+bids_root = pathlib.Path('/storage/store2/data/Omega')
+deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 
 subjects_dir = pathlib.Path('/storage/store/data/camcan-mne/freesurfer')
 
-subjects = ['0002']
+subjects = ['0523']
 
-process_empty_room = False
+process_empty_room = True
 
 drop_channels = [
     'MLC63', 'MLO52', 'MLT26', 'MLT55',
