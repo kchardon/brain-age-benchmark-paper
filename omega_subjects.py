@@ -794,3 +794,61 @@ raw.compute_psd(picks = 'meg').plot(axes = ax)
 ax.set_xlim([0,70])
 
 plt.show()
+
+# %% Look at every preprocessing step
+
+fig, axs = plt.subplots(nrows=4, ncols=1, figsize = (8,7))
+
+raw_path = os.path.join(bids_root, "sub-CONP0173/ses-02/meg/sub-CONP0173_ses-02_task-rest_run-01_meg.ds")
+raw = mne.io.read_raw_ctf(raw_path).load_data()
+raw.compute_psd(picks = 'meg').plot(axes = axs.flat[0])
+axs.flat[0].set_xlim([0,60])
+axs.flat[0].set_ylim([-10,120])
+axs.flat[0].set_title("Raw data")
+
+raw_notch = raw.notch_filter(60)
+raw_notch.compute_psd(picks = 'meg').plot(axes = axs.flat[1])
+axs.flat[1].set_xlim([0,100])
+axs.flat[1].set_ylim([-10,120])
+axs.flat[1].set_title("Notch filter")
+
+raw_filter = raw_notch.filter(0.1,49)
+raw_filter.compute_psd(picks = 'meg').plot(axes = axs.flat[2])
+axs.flat[2].set_xlim([0,60])
+axs.flat[2].set_ylim([-10,120])
+axs.flat[2].set_title("Notch filter + Bandpass filter")
+
+raw_resample = raw_filter.resample(200)
+raw_resample.compute_psd(picks = 'meg').plot(axes = axs.flat[3])
+axs.flat[3].set_xlim([0,60])
+axs.flat[3].set_ylim([-10,120])
+axs.flat[3].set_title("Notch filter + Bandpass filter + Resample")
+
+plt.show()
+
+# %% Test of different freq for resample
+
+fig, axs = plt.subplots(nrows=3, ncols=1, figsize = (40,35))
+
+raw_path = os.path.join(bids_root, "sub-CONP0173/ses-02/meg/sub-CONP0173_ses-02_task-rest_run-01_meg.ds")
+raw = mne.io.read_raw_ctf(raw_path).load_data()
+raw.compute_psd(picks = 'meg').plot(axes = axs.flat[0])
+axs.flat[0].set_xlim([0,100])
+axs.flat[0].set_ylim([-10,120])
+axs.flat[0].set_title("Raw data")
+
+
+raw_resample = raw.resample(200)
+raw_resample.compute_psd(picks = 'meg').plot(axes = axs.flat[1])
+axs.flat[1].set_xlim([0,100])
+axs.flat[1].set_ylim([-10,120])
+axs.flat[1].set_title("Resample at 200Hz")
+
+
+raw_resample = raw.resample(2000)
+raw_resample.compute_psd(picks = 'meg').plot(axes = axs.flat[2])
+axs.flat[2].set_xlim([0,100])
+axs.flat[2].set_ylim([-10,120])
+axs.flat[2].set_title("Resample at 2000Hz")
+
+plt.show()
