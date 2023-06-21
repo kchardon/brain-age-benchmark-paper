@@ -852,3 +852,93 @@ axs.flat[2].set_ylim([-10,120])
 axs.flat[2].set_title("Resample at 2000Hz")
 
 plt.show()
+
+# %% Vérification filt_raw
+
+path = '/storage/store3/work/kachardo/derivatives/omega/sub-0233/ses-01/meg/sub-0233_ses-01_task-rest_run-01_proc-filt_raw.fif'
+raw_filt = mne.io.read_raw_fif(path)
+raw_filt.info
+
+# %% Plot avant et après preprocessing
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+colors = list(colors)
+color = None
+
+fig = plt.figure(figsize = (10,5))
+ax_before = plt.subplot(2,1,1)
+ax_after = plt.subplot(2,1,2)
+fig.add_subplot(ax_before)
+fig.add_subplot(ax_after)
+
+for i, subject in enumerate(list(subjects_data[subjects_data['group'] == 'Control']['subject_id'])):
+        session = subjects_data[subjects_data['subject_id']==subject]['session'].iloc[0]
+        run = subjects_data[subjects_data['subject_id']==subject]['run'].iloc[0]
+        
+        epoch_before_path = os.path.join(bids_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_run-0"+str(run)+"_meg.ds")
+        epoch_after_path = os.path.join(deriv_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_run-0"+str(run)+"_proc-filt_raw.fif")
+        
+        epoch_before = mne.io.read_raw_ctf(epoch_before_path)
+        epoch_after = mne.io.read_raw_fif(epoch_after_path)
+        
+        if i >= len(colors):
+            color = colors[i - len(colors)]
+        else:
+            color = colors[i]
+
+        epoch_before.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_before, ci = None)
+        epoch_after.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_after, ci = None)
+            
+ax_before.set_title('Average PSD for each Control subject (Raw)')
+ax_before.set_xlim([0.1,50])
+ax_before.set_ylim([0,100])
+ax_after.set_title('Average PSD for each Control subject (Raw, after notch filter, bandpass filter and resampling)')
+ax_after.set_xlim([0.1,50])
+ax_after.set_ylim([0,100])
+
+# %% Plot avant, pendant et après preprocessing (raw, avec notch et bandpass filter, epochs avec decim)
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+colors = list(colors)
+color = None
+
+fig = plt.figure(figsize = (10,5))
+ax_before = plt.subplot(2,1,1)
+ax_during = plt.subplot(2,1,1)
+ax_after = plt.subplot(2,1,2)
+fig.add_subplot(ax_before)
+fig.add_subplot(ax_during)
+fig.add_subplot(ax_after)
+
+for i, subject in enumerate(list(subjects_data[subjects_data['group'] == 'Control']['subject_id'])):
+        session = subjects_data[subjects_data['subject_id']==subject]['session'].iloc[0]
+        run = subjects_data[subjects_data['subject_id']==subject]['run'].iloc[0]
+        
+        epoch_before_path = os.path.join(bids_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_run-0"+str(run)+"_meg.ds")
+        epoch_during_path = os.path.join(deriv_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_run-0"+str(run)+"_proc-filt_raw.fif")
+        epoch_after_path = os.path.join(deriv_root,"sub-"+str(subject), "ses-0"+str(session), "meg","sub-"+str(subject)+"_ses-0"+str(session)+"_task-rest_epo.fif")
+        
+        epoch_before = mne.io.read_raw_ctf(epoch_before_path)
+        epoch_during = mne.io.read_raw_fif(epoch_during_path)
+        epoch_after = mne.read_epochs(epoch_after_path)
+        
+        if i >= len(colors):
+            color = colors[i - len(colors)]
+        else:
+            color = colors[i]
+
+        epoch_before.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_before, ci = None)
+        epoch_during.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_during, ci = None)
+        epoch_after.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax_after, ci = None)
+            
+ax_before.set_title('Average PSD for each Control subject (Raw)')
+ax_before.set_xlim([0.1,50])
+ax_before.set_ylim([0,100])
+
+ax_during.set_title('Average PSD for each Control subject (Raw, after notch filter and bandpass filter)')
+ax_during.set_xlim([0.1,50])
+ax_during.set_ylim([0,100])
+
+ax_after.set_title('Average PSD for each Control subject (Epochs, after notch filter, bandpass filter and decim = 12)')
+ax_after.set_xlim([0.1,50])
+ax_after.set_ylim([0,100])
