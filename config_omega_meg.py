@@ -7,7 +7,7 @@ deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 
 subjects_dir = pathlib.Path('/storage/store/data/camcan-mne/freesurfer')
 
-subjects = ['0523']
+subjects = ['0437']
 
 process_empty_room = False
 
@@ -53,8 +53,8 @@ source_info_path_update = {'processing': 'autoreject',
 
 task_is_rest = True
 task = 'rest'
-sessions = ['02']
-runs = ['03']
+sessions = ['01']
+runs = ['01']
 data_type = 'meg'
 ch_types = ['meg']
 
@@ -66,6 +66,10 @@ notch_freq = 60
 eog_channels = ["VEOG", "HEOG"]
 
 spatial_filter = 'ssp'
+# New parameters
+ssp_type = 'freq_bands'
+ssp_freq_band = {'l_freq': 1, 'h_freq': 7}
+n_proj_freq = {'n_mag' : 20}
 #n_proj_eog = 1
 
 reject = None
