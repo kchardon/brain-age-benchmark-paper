@@ -7,7 +7,7 @@ deriv_root = pathlib.Path('/storage/store3/work/kachardo/derivatives/omega')
 
 subjects_dir = pathlib.Path('/storage/store/data/camcan-mne/freesurfer')
 
-subjects = ['CONP0173']
+subjects = ['0470', '0488', '0489', '0490', '0491', '0494', '0520', '0527']
 
 process_empty_room = False
 
@@ -53,8 +53,8 @@ source_info_path_update = {'processing': 'autoreject',
 
 task_is_rest = True
 task = 'rest'
-sessions = ['02']
-runs = ['01']
+sessions = ['01']
+runs = ['02']
 data_type = 'meg'
 ch_types = ['meg']
 

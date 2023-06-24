@@ -942,3 +942,33 @@ ax_during.set_ylim([0,100])
 ax_after.set_title('Average PSD for each Control subject (Epochs, after notch filter, bandpass filter and decim = 12)')
 ax_after.set_xlim([0.1,50])
 ax_after.set_ylim([0,100])
+
+# %% Plot PSD after SSP on low frequencies for Contro subjects
+# Run mne-bids-pipeline with new ssp on all the subjects
+# 23, 11, 12, 13, 21, 22
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+colors = list(colors)
+color = None
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-clean_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            if i >= len(colors):
+                color = colors[i - len(colors)]
+            else:
+                color = colors[i]
+            epoch.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax, ci = None)
+            i += 1
+            
+ax.set_title('Average PSD for each Control subject')
+plt.show()
