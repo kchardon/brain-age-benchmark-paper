@@ -943,7 +943,7 @@ ax_after.set_title('Average PSD for each Control subject (Epochs, after notch fi
 ax_after.set_xlim([0.1,50])
 ax_after.set_ylim([0,100])
 
-# %% Plot PSD after SSP on low frequencies for Contro subjects
+# %% Plot PSD after SSP on low frequencies for Control subjects
 # Run mne-bids-pipeline with new ssp on all the subjects
 # 23, 11, 12, 13, 21, 22
 
@@ -971,4 +971,109 @@ for subject in os.listdir(deriv_root):
             i += 1
             
 ax.set_title('Average PSD for each Control subject')
+plt.show()
+
+
+# %% Plot PSD after autoreject
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+colors = list(colors)
+color = None
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            if i >= len(colors):
+                color = colors[i - len(colors)]
+            else:
+                color = colors[i]
+            epoch.compute_psd(picks = 'meg').plot(color = color, picks = 'meg', average = True,axes = ax, ci = None)
+            i += 1
+            
+ax.set_title('Average PSD for each Control subject after autoreject')
+plt.show()
+
+# %% Plot all PSDs
+
+fig, axs = plt.subplots(nrows=82, ncols=2, layout='constrained', figsize=(20,200))
+i = 0
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)
+            axs.flat[i].set_ylim([-10,120])
+            axs.flat[i].set_xlabel(subject)
+            epoch.compute_psd(picks = 'meg').plot(axes = axs.flat[i], picks = 'meg', average = True, ci = None)
+            i +=1
+
+plt.show()
+fig.savefig('omega_subjects_control_psd_ssp_low.png')
+
+
+# %% Plot distribution of covariances
+from pyriemann.estimation import XdawnCovariances
+from pyriemann.utils.viz import plot_embedding
+from pyriemann.embedding import SpectralEmbedding
+from coffeine import ProjCommonSpace
+
+import mne
+from mne import io
+
+import matplotlib.pyplot as plt
+# %% Open the covariances
+features = h5io.read_hdf5(
+            deriv_root / 'features_fb_covs_rest.h5')
+
+# %% Alpha covariances of all control subjects
+nb_control = subjects_data[subjects_data['group'] == 'Control'].shape[0]
+covs_alpha = np.empty((nb_control, 262, 262))
+i = 0
+
+for sub in features :
+    if subjects_data[subjects_data['subject_id'] == sub[4:]]['group'].iloc[0] == 'Control':
+        covs_alpha[i] = features[sub]['covs'][0]
+        i += 1
+
+print(covs_alpha)
+
+# %% Proj common space
+pcs = ProjCommonSpace(n_compo=150)
+covs_alpha_proj = pcs.fit(covs_alpha).transform(covs_alpha)
+covs_alpha_proj = pd.DataFrame.to_numpy(covs_alpha_proj)
+print(covs_alpha_proj)
+
+# %% Remake array
+covs_alpha_p = np.empty((nb_control, 150, 150))
+for i in range(nb_control):
+    covs_alpha_p[i] = covs_alpha_proj[i][0]
+print(covs_alpha_p)
+
+# %% Spectral embedding
+se = SpectralEmbedding()
+covs_embedding = se.fit(covs_alpha_p).fit_transform(covs_alpha_p)
+print(covs_embedding)
+
+# %% Age list
+ages = []
+
+for sub in list(features.keys()):
+    if subjects_data[subjects_data['subject_id'] == sub[4:]]['group'].iloc[0] == 'Control':
+        ages.append(all_subjects[all_subjects['participant_id'] == sub]['age'].iloc[0] / 2)
+
+ages
+
+# %% Plot embeddings
+plt.scatter(covs_embedding[:,0], covs_embedding[:,1], s = ages)
 plt.show()
