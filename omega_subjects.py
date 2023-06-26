@@ -1023,8 +1023,6 @@ fig.savefig('omega_subjects_control_psd_ssp_low.png')
 
 
 # %% Plot distribution of covariances
-from pyriemann.estimation import XdawnCovariances
-from pyriemann.utils.viz import plot_embedding
 from pyriemann.embedding import SpectralEmbedding
 from coffeine import ProjCommonSpace
 
@@ -1070,7 +1068,7 @@ ages = []
 
 for sub in list(features.keys()):
     if subjects_data[subjects_data['subject_id'] == sub[4:]]['group'].iloc[0] == 'Control':
-        ages.append(all_subjects[all_subjects['participant_id'] == sub]['age'].iloc[0] / 2)
+        ages.append((all_subjects[all_subjects['participant_id'] == sub]['age'].iloc[0] / 7) ** 2)
 
 ages
 
