@@ -3,6 +3,7 @@ import pathlib
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 from matplotlib import colors as mcolors
 import json
 import h5io
@@ -1068,10 +1069,82 @@ ages = []
 
 for sub in list(features.keys()):
     if subjects_data[subjects_data['subject_id'] == sub[4:]]['group'].iloc[0] == 'Control':
-        ages.append((all_subjects[all_subjects['participant_id'] == sub]['age'].iloc[0] / 7) ** 2)
+        ages.append(all_subjects[all_subjects['participant_id'] == sub]['age'].iloc[0] ** 2)
 
 ages
 
 # %% Plot embeddings
 plt.scatter(covs_embedding[:,0], covs_embedding[:,1], s = ages)
+plt.show()
+
+
+# %% PCA vecteur tangent
+
+from pyriemann.tangentspace import TangentSpace
+from sklearn.decomposition import PCA
+import seaborn as sns
+
+ts = TangentSpace()
+covs_tangent = ts.fit_transform(covs_alpha_p)
+pca = PCA(n_components=2)
+covs_pca = pca.fit_transform(covs_tangent)
+
+# %% Dataframe PCA
+
+df_pca_covs = pd.DataFrame({
+        '1st compo': covs_pca[:, 0],
+        '2nd compo': covs_pca[:, 1]
+    })
+
+df_pca_covs['age'] = ages
+
+# %% Plot PCA
+
+sns.set_theme(style="whitegrid", font_scale=1.5)
+sns.set_palette('colorblind')
+sns.despine()
+g = sns.FacetGrid(df_pca_covs, 
+                  height=4, aspect=1,
+                  margin_titles=True,
+                  sharex=False, sharey=False
+                  )
+g.map_dataframe(sns.scatterplot, '1st compo', '2nd compo', size = 'age')
+g.set_axis_labels('Principal component 1', 'Principal component 2')
+
+# %% PSD gradient en fonction de l'age
+
+fig = plt.figure(figsize = (10,5))
+ax = plt.subplot()
+fig.add_subplot(ax)
+i = 0
+viridis = matplotlib.colormaps['viridis'].resampled(60)
+
+for subject in os.listdir(deriv_root):
+    if subject.startswith('sub'):
+        id = subject[4:]
+        if subjects_data[subjects_data['subject_id']==id]['group'].iloc[0] == 'Control':
+            session = subjects_data[subjects_data['subject_id']==id]['session'].iloc[0]
+            age = all_subjects[all_subjects['participant_id']==subject]['age'].iloc[0]
+            epoch_file = os.path.join(deriv_root,subject, "ses-0"+str(session), "meg","sub-"+str(id)+"_ses-0"+str(session)+"_task-rest_proc-autoreject_epo.fif")
+            epoch = mne.read_epochs(epoch_file)  
+            epoch.compute_psd(picks = 'meg').plot(color = mcolors.to_hex(viridis(round(age)-20)), picks = 'meg', average = True,axes = ax, ci = None)
+            i += 1
+
+ax.set_xlim([0,50])
+ax.set_ylim([30,60])
+
+# for legend
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+ax2 = plt.subplot()
+hexbins = ax2.hexbin([20,80], [20,80], C=[0,1], cmap=viridis)
+
+axins1 = inset_axes(ax, width='10%', height='2%', loc='upper right')
+cbar = fig.colorbar(hexbins, cax=axins1, orientation='horizontal', ticks=[0,1])
+cbar.ax.set_xticklabels(['20', '80'])
+axins1.xaxis.set_ticks_position('bottom')
+axins1.set_title('age')
+#
+
+ax.set_title('Average PSD for each Control subject after autoreject')
 plt.show()
